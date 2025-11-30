@@ -1,28 +1,28 @@
-// 朵拉的热带探险 - 管理员界面脚本
+// Dora's Tropical Adventure - Admin Interface Script
 
 let currentSessionId = null;
 let commandHistory = [];
 let historyIndex = -1;
-let currentMode = 'shell'; // 'shell' 或 'gui'
+let currentMode = 'shell'; // 'shell' or 'gui'
 
 // ============================================================
-// 模式切换
+// Mode Switching
 // ============================================================
 
 function switchMode(mode) {
     currentMode = mode;
 
-    // 更新按钮状态
+    // Update button states
     document.getElementById('shellModeBtn').classList.toggle('active', mode === 'shell');
     document.getElementById('guiModeBtn').classList.toggle('active', mode === 'gui');
 
-    // 切换显示区域
+    // Switch display areas
     if (currentSessionId) {
         document.getElementById('shellArea').style.display = mode === 'shell' ? 'flex' : 'none';
         document.getElementById('guiArea').style.display = mode === 'gui' ? 'flex' : 'none';
         document.getElementById('noSessionArea').style.display = 'none';
 
-        // GUI模式下刷新状态
+        // Refresh status in GUI mode
         if (mode === 'gui') {
             guiRefresh();
         }
@@ -30,7 +30,7 @@ function switchMode(mode) {
 }
 
 // ============================================================
-// 会话管理
+// Session Management
 // ============================================================
 
 async function loadSessions() {
@@ -39,14 +39,14 @@ async function loadSessions() {
         const data = await response.json();
         renderSessionList(data.sessions);
     } catch (error) {
-        console.error('加载会话失败:', error);
+        console.error('Failed to load sessions:', error);
     }
 }
 
 function renderSessionList(sessions) {
     const container = document.getElementById('sessionList');
     if (sessions.length === 0) {
-        container.innerHTML = '<div style="padding: 20px; color: #8b949e; text-align: center;">暂无活跃会话</div>';
+        container.innerHTML = '<div style="padding: 20px; color: #8b949e; text-align: center;">No active sessions</div>';
         return;
     }
 
@@ -56,7 +56,7 @@ function renderSessionList(sessions) {
             <span class="status ${s.process_alive ? 'status-alive' : 'status-dead'}"></span>
             <span class="sid">${s.session_id.substring(0, 12)}...</span>
             <div style="font-size: 11px; color: #8b949e; margin-top: 4px;">
-                ${s.process_alive ? '运行中' : '已结束'} | ${s.last_activity}
+                ${s.process_alive ? 'Running' : 'Ended'} | ${s.last_activity}
             </div>
         </div>
     `).join('');
@@ -72,13 +72,13 @@ async function selectSession(sessionId) {
         document.getElementById('shellArea').style.display = 'flex';
         document.getElementById('guiArea').style.display = 'none';
         document.getElementById('currentSessionInfo').textContent = 'Session: ' + shortId;
-        document.getElementById('shellOutput').innerHTML = '<span class="system">已连接到会话 ' + sessionId.substring(0, 8) + '...</span>\n';
+        document.getElementById('shellOutput').innerHTML = '<span class="system">Connected to session ' + sessionId.substring(0, 8) + '...</span>\n';
         document.getElementById('shellInput').focus();
     } else {
         document.getElementById('shellArea').style.display = 'none';
         document.getElementById('guiArea').style.display = 'flex';
         document.getElementById('guiSessionInfo').textContent = 'Session: ' + shortId;
-        document.getElementById('guiOutput').innerHTML = '<span class="system">已连接到会话 ' + sessionId.substring(0, 8) + '...</span>\n';
+        document.getElementById('guiOutput').innerHTML = '<span class="system">Connected to session ' + sessionId.substring(0, 8) + '...</span>\n';
         guiRefresh();
     }
 
@@ -95,12 +95,12 @@ async function createNewSession() {
         if (data.session_id) {
             selectSession(data.session_id);
             if (currentMode === 'shell') {
-                appendOutput('新会话已创建: ' + data.session_id.substring(0, 8) + '...', 'system');
+                appendOutput('New session created: ' + data.session_id.substring(0, 8) + '...', 'system');
                 if (data.output) {
                     appendOutput(data.output, 'output');
                 }
             } else {
-                appendGuiOutput('新会话已创建并已启动游戏', 'system');
+                appendGuiOutput('New session created and game started', 'system');
                 if (data.output) {
                     appendGuiOutput(data.output, 'output');
                 }
@@ -109,13 +109,13 @@ async function createNewSession() {
         }
         loadSessions();
     } catch (error) {
-        alert('创建会话失败: ' + error.message);
+        alert('Failed to create session: ' + error.message);
     }
 }
 
 async function killSession() {
     if (!currentSessionId) return;
-    if (!confirm('确定要终止这个会话吗？')) return;
+    if (!confirm('Are you sure you want to terminate this session?')) return;
 
     try {
         const response = await fetch('/admin/api/kill', {
@@ -126,22 +126,22 @@ async function killSession() {
         const data = await response.json();
 
         if (currentMode === 'shell') {
-            appendOutput(data.message || '会话已终止', 'system');
+            appendOutput(data.message || 'Session terminated', 'system');
         } else {
-            appendGuiOutput(data.message || '会话已终止', 'system');
+            appendGuiOutput(data.message || 'Session terminated', 'system');
         }
         loadSessions();
     } catch (error) {
         if (currentMode === 'shell') {
-            appendOutput('错误: ' + error.message, 'error');
+            appendOutput('Error: ' + error.message, 'error');
         } else {
-            appendGuiOutput('错误: ' + error.message, 'error');
+            appendGuiOutput('Error: ' + error.message, 'error');
         }
     }
 }
 
 // ============================================================
-// Shell模式功能
+// Shell Mode Functions
 // ============================================================
 
 async function sendShellCommand() {
@@ -151,11 +151,11 @@ async function sendShellCommand() {
     const command = input.value.trim();
     if (!command) return;
 
-    // 添加到历史
+    // Add to history
     commandHistory.push(command);
     historyIndex = commandHistory.length;
 
-    // 显示命令
+    // Display command
     appendOutput('?- ' + command, 'command');
     input.value = '';
 
@@ -176,7 +176,7 @@ async function sendShellCommand() {
             appendOutput(data.error, 'error');
         }
     } catch (error) {
-        appendOutput('错误: ' + error.message, 'error');
+        appendOutput('Error: ' + error.message, 'error');
     }
 }
 
@@ -188,18 +188,18 @@ function quickQuery(cmd) {
 function appendOutput(text, className) {
     const output = document.getElementById('shellOutput');
     output.innerHTML += '<span class="' + className + '">' + escapeHtml(text) + '</span>\n';
-    // 自动滚动到底部
+    // Auto-scroll to bottom
     setTimeout(() => {
         output.scrollTop = output.scrollHeight;
     }, 10);
 }
 
 function clearOutput() {
-    document.getElementById('shellOutput').innerHTML = '<span class="system">输出已清空</span>\n';
+    document.getElementById('shellOutput').innerHTML = '<span class="system">Output cleared</span>\n';
 }
 
 async function refreshOutput() {
-    appendOutput('[刷新]', 'system');
+    appendOutput('[Refresh]', 'system');
 }
 
 function handleShellKeyDown(event) {
@@ -224,7 +224,7 @@ function handleShellKeyDown(event) {
 }
 
 // ============================================================
-// GUI模式功能
+// GUI Mode Functions
 // ============================================================
 
 async function guiCommand(cmd) {
@@ -249,11 +249,11 @@ async function guiCommand(cmd) {
             appendGuiOutput(data.error, 'error');
         }
 
-        // 执行命令后刷新状态
+        // Refresh status after executing command
         setTimeout(guiRefresh, 500);
 
     } catch (error) {
-        appendGuiOutput('错误: ' + error.message, 'error');
+        appendGuiOutput('Error: ' + error.message, 'error');
     }
 }
 
@@ -296,7 +296,7 @@ function handleGuiKeyDown(event) {
 function appendGuiOutput(text, className) {
     const output = document.getElementById('guiOutput');
 
-    // 检查是否包含Swiper回合
+    // Check if contains Swiper turn
     if (text.includes('--- Swiper')) {
         const parts = text.split('--- Swiper');
         output.innerHTML += '<span class="' + className + '">' + escapeHtml(parts[0]) + '</span>\n';
@@ -313,14 +313,14 @@ function appendGuiOutput(text, className) {
 }
 
 function clearGuiOutput() {
-    document.getElementById('guiOutput').innerHTML = '<span class="system">输出已清空</span>\n';
+    document.getElementById('guiOutput').innerHTML = '<span class="system">Output cleared</span>\n';
 }
 
 async function guiRefresh() {
     if (!currentSessionId) return;
 
     try {
-        // 查询玩家位置
+        // Query player location
         let response = await fetch('/admin/api/shell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -331,9 +331,9 @@ async function guiRefresh() {
         });
         let data = await response.json();
         let match = data.output ? data.output.match(/(\w+)/) : null;
-        document.getElementById('guiPlayerLocation').textContent = '位置: ' + (match ? match[1] : '-');
+        document.getElementById('guiPlayerLocation').textContent = 'Location: ' + (match ? match[1] : '-');
 
-        // 查询Swiper位置
+        // Query Swiper location
         response = await fetch('/admin/api/shell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -344,9 +344,9 @@ async function guiRefresh() {
         });
         data = await response.json();
         match = data.output ? data.output.match(/(\w+)/) : null;
-        document.getElementById('guiSwiperLocation').textContent = '位置: ' + (match ? match[1] : '-');
+        document.getElementById('guiSwiperLocation').textContent = 'Location: ' + (match ? match[1] : '-');
 
-        // 查询得分
+        // Query score
         response = await fetch('/admin/api/shell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -357,9 +357,9 @@ async function guiRefresh() {
         });
         data = await response.json();
         match = data.output ? data.output.match(/(\d+)/) : null;
-        document.getElementById('guiPlayerScore').textContent = '得分: ' + (match ? match[1] : '0');
+        document.getElementById('guiPlayerScore').textContent = 'Score: ' + (match ? match[1] : '0');
 
-        // 查询时间
+        // Query time
         response = await fetch('/admin/api/shell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -370,9 +370,9 @@ async function guiRefresh() {
         });
         data = await response.json();
         match = data.output ? data.output.match(/(\d+)/) : null;
-        document.getElementById('guiGameTime').textContent = '时间: ' + (match ? match[1] : '-');
+        document.getElementById('guiGameTime').textContent = 'Time: ' + (match ? match[1] : '-');
 
-        // 查询背包
+        // Query backpack
         response = await fetch('/admin/api/shell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -386,10 +386,10 @@ async function guiRefresh() {
         if (backpackMatch && backpackMatch[1].trim()) {
             document.getElementById('guiBackpack').textContent = backpackMatch[1];
         } else {
-            document.getElementById('guiBackpack').textContent = '空';
+            document.getElementById('guiBackpack').textContent = 'Empty';
         }
 
-        // 查询藏匿物品
+        // Query hidden items
         response = await fetch('/admin/api/shell', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -403,16 +403,16 @@ async function guiRefresh() {
         if (hiddenMatch && hiddenMatch[1].trim()) {
             document.getElementById('guiHiddenItems').textContent = hiddenMatch[1];
         } else {
-            document.getElementById('guiHiddenItems').textContent = '无';
+            document.getElementById('guiHiddenItems').textContent = 'None';
         }
 
     } catch (error) {
-        console.error('刷新状态失败:', error);
+        console.error('Failed to refresh status:', error);
     }
 }
 
 // ============================================================
-// 工具函数
+// Utility Functions
 // ============================================================
 
 function escapeHtml(text) {
@@ -422,9 +422,9 @@ function escapeHtml(text) {
 }
 
 // ============================================================
-// 初始化
+// Initialization
 // ============================================================
 
-// 定期刷新会话列表
+// Periodically refresh session list
 setInterval(loadSessions, 5000);
 loadSessions();

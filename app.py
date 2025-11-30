@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-朵拉的热带探险 - Web前端
-通过SWI-Prolog运行真正的Prolog游戏 (dora_adventure.pl)
+Dora's Tropical Adventure - Web Frontend
+Runs the actual Prolog game (dora_adventure.pl) via SWI-Prolog
 """
 
 from flask import Flask, render_template, jsonify, request, session
@@ -13,10 +13,10 @@ import threading
 import time
 import select
 
-# 导入Swiper AI (优先使用Fast-Downward PDDL规划器)
+# Import Swiper AI (prefers Fast-Downward PDDL planner)
 from swiper_planner import SwiperAI
 
-# 获取当前目录
+# Get current directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__,
@@ -24,29 +24,29 @@ app = Flask(__name__,
             static_folder=os.path.join(BASE_DIR, 'static'))
 app.secret_key = 'dora_adventure_prolog_2024'
 
-# 存储每个会话的Prolog进程
+# Store Prolog processes for each session
 prolog_sessions = {}
 
-# Swiper AI实例 (自动选择Fast-Downward或启发式AI)
+# Swiper AI instance (auto-selects Fast-Downward or heuristic AI)
 swiper_ai = SwiperAI()
 
-# 回合制相关配置
-TURN_BASED_ENABLED = True  # 是否启用回合制
-PLAYER_ACTION_COMMANDS = {'go', 'take', 'drop', 'use', 'boots_search'}  # 触发Swiper回合的命令
+# Turn-based configuration
+TURN_BASED_ENABLED = True  # Enable turn-based mode
+PLAYER_ACTION_COMMANDS = {'go', 'take', 'drop', 'use', 'boots_search'}  # Commands that trigger Swiper's turn
 
-# 允许的游戏命令白名单
+# Allowed game commands whitelist
 ALLOWED_COMMANDS = {
-    # 基础命令（无参数）
+    # Basic commands (no parameters)
     'start', 'look', 'inventory', 'status', 'help', 'quit',
     'boots_search', 'stop_swiper',
-    # 带参数的命令前缀
+    # Commands with parameters
     'go', 'take', 'drop', 'use', 'drop_confirm'
 }
 
-# 允许的方向
+# Allowed directions
 ALLOWED_DIRECTIONS = {'north', 'south', 'east', 'west', 'up', 'down'}
 
-# 危险命令黑名单 - 只检查命令名，不检查参数
+# Dangerous commands blacklist - only check command name, not arguments
 DANGEROUS_COMMANDS = {
     'halt', 'shell', 'system', 'open', 'read_term', 'write_canonical',
     'consult', 'load_files', 'ensure_loaded', 'use_module',
@@ -60,81 +60,81 @@ DANGEROUS_COMMANDS = {
     'asserta', 'assertz', 'retractall'
 }
 
-# 危险字符模式
+# Dangerous character patterns
 DANGEROUS_CHARS = [':-', '?-', '->', ';', '!', '[', ']', '|', '\\']
 
 
 def validate_command(command):
     """
-    验证用户输入的命令是否合法
-    返回: (is_valid, error_message)
+    Validate user input command
+    Returns: (is_valid, error_message)
     """
     if not command:
-        return False, "请输入命令！"
+        return False, "Please enter a command!"
 
-    # 移除末尾的点号进行验证
+    # Remove trailing period for validation
     cmd = command.strip()
     if cmd.endswith('.'):
         cmd = cmd[:-1].strip()
 
-    # 检查命令长度
+    # Check command length
     if len(cmd) > 100:
-        return False, "命令太长了！"
+        return False, "Command too long!"
 
-    # 检查危险字符
+    # Check dangerous characters
     for char in DANGEROUS_CHARS:
         if char in cmd:
-            return False, f"不允许使用该字符！请使用游戏命令如 go(north), take(item) 等。"
+            return False, f"Character not allowed! Please use game commands like go(north), take(item), etc."
 
-    # 解析命令名和参数
+    # Parse command name and arguments
     if '(' in cmd:
-        # 带参数的命令，如 go(north)
+        # Command with parameters, e.g., go(north)
         match = re.match(r'^(\w+)\s*\(\s*(\w+)\s*\)$', cmd)
         if not match:
-            return False, f"命令格式不正确！正确格式如: go(north), take(item_name)"
+            return False, f"Invalid command format! Correct format: go(north), take(item_name)"
 
         cmd_name = match.group(1).lower()
-        cmd_arg = match.group(2)  # 保持原始大小写
+        cmd_arg = match.group(2)  # Keep original case
 
-        # 检查是否是危险命令
+        # Check if dangerous command
         if cmd_name in DANGEROUS_COMMANDS:
-            return False, f"不允许使用该命令！请使用游戏命令如 go(north), take(item) 等。"
+            return False, f"Command not allowed! Please use game commands like go(north), take(item), etc."
 
-        # 检查是否是允许的命令
+        # Check if allowed command
         if cmd_name not in ALLOWED_COMMANDS:
-            return False, f"未知命令 '{cmd_name}'！可用命令: go, take, drop, use, look, inventory 等"
+            return False, f"Unknown command '{cmd_name}'! Available: go, take, drop, use, look, inventory, etc."
 
-        # 验证 go 命令的方向
+        # Validate go command direction
         if cmd_name == 'go' and cmd_arg.lower() not in ALLOWED_DIRECTIONS:
-            return False, f"无效方向 '{cmd_arg}'！可用方向: north, south, east, west, up, down"
+            return False, f"Invalid direction '{cmd_arg}'! Available: north, south, east, west, up, down"
 
-        # 验证参数只包含字母、数字和下划线
+        # Validate argument contains only letters, numbers, and underscores
         if not re.match(r'^\w+$', cmd_arg):
-            return False, "参数只能包含字母、数字和下划线！"
+            return False, "Arguments can only contain letters, numbers, and underscores!"
 
     else:
-        # 无参数命令，如 look, inventory
+        # Command without parameters, e.g., look, inventory
         cmd_name = cmd.lower()
 
-        # 检查是否是危险命令
+        # Check if dangerous command
         if cmd_name in DANGEROUS_COMMANDS:
-            return False, f"不允许使用该命令！请使用游戏命令如 go(north), take(item) 等。"
+            return False, f"Command not allowed! Please use game commands like go(north), take(item), etc."
 
         if cmd_name not in ALLOWED_COMMANDS:
-            return False, f"未知命令 '{cmd_name}'！可用命令: start, look, inventory, status, help, boots_search, stop_swiper"
+            return False, f"Unknown command '{cmd_name}'! Available: start, look, inventory, status, help, boots_search, stop_swiper"
 
     return True, None
 
 
 class PrologSession:
-    """管理单个Prolog会话"""
+    """Manage a single Prolog session"""
 
     def __init__(self, session_id):
         self.session_id = session_id
         self.process = None
         self.lock = threading.Lock()
         self.last_activity = time.time()
-        # 缓存游戏状态（从输出解析）
+        # Cache game state (parsed from output)
         self.cached_state = {
             'player_location': None,
             'swiper_location': None,
@@ -145,35 +145,35 @@ class PrologSession:
         }
 
     def start(self):
-        """启动Prolog进程"""
+        """Start Prolog process"""
         prolog_file = os.path.join(BASE_DIR, 'dora_adventure.pl')
 
-        # 启动SWI-Prolog进程（使用管道，非交互模式）
+        # Start SWI-Prolog process (using pipes, non-interactive mode)
         self.process = subprocess.Popen(
             ['swipl', '-q', '-s', prolog_file],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=0  # 无缓冲
+            bufsize=0  # Unbuffered
         )
 
-        # 等待加载完成，并清空初始输出
+        # Wait for loading and clear initial output
         time.sleep(1.0)
-        # 循环读取直到没有更多输出
+        # Read until no more output
         while True:
             output = self._read_output(timeout=1.0)
             if not output:
                 break
             time.sleep(0.1)
-        return "Prolog游戏已加载"
+        return "Prolog game loaded"
 
     def _read_output(self, timeout=2.0):
-        """读取Prolog输出"""
+        """Read Prolog output"""
         output_lines = []
         start_time = time.time()
         last_read_time = start_time
-        idle_timeout = 0.6  # 没有新输出后等待0.6秒
+        idle_timeout = 0.6  # Wait 0.6 seconds after no new output
 
         try:
             while time.time() - start_time < timeout:
@@ -189,59 +189,59 @@ class PrologSession:
                     else:
                         break
                 else:
-                    # 如果已有输出且空闲超过idle_timeout，认为输出完成
+                    # If we have output and idle for more than idle_timeout, consider complete
                     if output_lines and (time.time() - last_read_time) > idle_timeout:
                         break
 
         except Exception as e:
-            output_lines.append(f"[读取错误: {e}]")
+            output_lines.append(f"[Read error: {e}]")
 
         return '\n'.join(output_lines)
 
     def send_command(self, command, silent=False):
         """
-        发送命令到Prolog
-        silent: 如果为True，执行命令但不更新last_activity（用于管理员查询）
+        Send command to Prolog
+        silent: If True, execute command but don't update last_activity (for admin queries)
         """
         if not silent:
             self.last_activity = time.time()
 
         with self.lock:
             if self.process is None or self.process.poll() is not None:
-                return "Prolog会话已结束，请刷新页面重新开始。"
+                return "Prolog session ended. Please refresh the page to restart."
 
             try:
-                # 先读取残留的输出（不丢弃，合并到结果中）
+                # Read any pending output first (don't discard, merge into result)
                 pending_output = self._read_output(timeout=0.1)
 
-                # 确保命令以点号结尾
+                # Ensure command ends with period
                 command = command.strip()
                 if not command.endswith('.'):
                     command += '.'
 
-                # 使用标记法确保读取完整输出
-                # 发送命令后，再发送一个标记命令，当看到标记时说明原命令输出完成
+                # Use marker method to ensure complete output reading
+                # Send command, then send a marker command; when we see the marker, original command output is complete
                 marker = f'__END_MARKER_{time.time()}__'
 
-                # 发送用户命令
+                # Send user command
                 self.process.stdin.write(command + '\n')
                 self.process.stdin.flush()
 
-                # 发送标记命令
+                # Send marker command
                 self.process.stdin.write(f"write('{marker}'), nl.\n")
                 self.process.stdin.flush()
 
-                # 读取输出直到看到标记
+                # Read output until we see the marker
                 output_parts = []
                 start_time = time.time()
-                max_wait = 15.0  # 最长等待15秒
+                max_wait = 15.0  # Maximum wait 15 seconds
 
                 while time.time() - start_time < max_wait:
                     part = self._read_output(timeout=2.0)
                     if part:
-                        # 检查是否包含标记
+                        # Check if contains marker
                         if marker in part:
-                            # 移除标记及其后面的内容
+                            # Remove marker and everything after it
                             idx = part.find(marker)
                             before_marker = part[:idx].rstrip()
                             if before_marker:
@@ -249,65 +249,65 @@ class PrologSession:
                             break
                         output_parts.append(part)
                     else:
-                        # 没有输出，短暂等待后继续
+                        # No output, wait briefly then continue
                         time.sleep(0.1)
 
                 output = '\n'.join(output_parts) if output_parts else ''
 
-                # 合并残留输出和新输出
+                # Merge pending output and new output
                 if pending_output:
                     output = pending_output + '\n' + output if output else pending_output
 
-                # 清理输出
+                # Clean output
                 output = self._clean_output(output)
 
-                # 从输出解析状态信息更新缓存（仅非静默模式）
+                # Parse state info from output to update cache (only in non-silent mode)
                 if not silent:
                     self._parse_state_from_output(output)
 
-                return output if output else "(命令已执行)"
+                return output if output else "(Command executed)"
 
             except Exception as e:
-                return f"命令执行错误: {e}"
+                return f"Command execution error: {e}"
 
     def _parse_state_from_output(self, output):
-        """从游戏输出中解析状态信息"""
-        # 解析位置（从 "=== xxx (Xxx) ===" 格式）
-        loc_match = re.search(r'=== .+ \((\w+)\) ===', output)
+        """Parse state information from game output"""
+        # Parse location (from "=== xxx ===" format)
+        loc_match = re.search(r'=== .+ ===', output)
         if loc_match:
-            # 从房间名提取位置ID
+            # Extract location ID from room name
             pass
 
-        # 解析移动信息
-        move_match = re.search(r'你从\w+移动到(\w+)', output)
+        # Parse movement info
+        move_match = re.search(r'You moved from \w+ to (\w+)', output)
         if move_match:
             self.cached_state['player_location'] = move_match.group(1)
 
-        # 解析得分
-        score_match = re.search(r'得分:\s*(\d+)', output)
+        # Parse score
+        score_match = re.search(r'Score:\s*(\d+)', output)
         if score_match:
             self.cached_state['score'] = int(score_match.group(1))
 
-        # 解析时间
-        time_match = re.search(r'剩余时间:\s*(\d+)', output)
+        # Parse time
+        time_match = re.search(r'Remaining [Tt]ime:\s*(\d+)', output)
         if time_match:
             self.cached_state['game_time'] = int(time_match.group(1))
 
-        # 解析当前位置（从输出中）
-        current_loc_match = re.search(r'当前位置:\s*(\w+)', output)
+        # Parse current location (from output)
+        current_loc_match = re.search(r'Current location:\s*(\w+)', output)
         if current_loc_match:
             self.cached_state['player_location'] = current_loc_match.group(1)
 
     def _clean_output(self, output):
-        """清理Prolog输出"""
+        """Clean Prolog output"""
         lines = output.split('\n')
         cleaned = []
 
         for line in lines:
-            # 移除Prolog提示符
+            # Remove Prolog prompts
             line = re.sub(r'^\?-\s*', '', line)
             line = re.sub(r'^\|\s*', '', line)
-            # 移除单独的true/false
+            # Remove standalone true/false
             stripped = line.strip()
             if stripped in ['true.', 'false.', 'true', 'false']:
                 continue
@@ -318,7 +318,7 @@ class PrologSession:
 
     def get_game_state_for_ai(self):
         """
-        从Prolog查询完整游戏状态,供Swiper AI使用
+        Query complete game state from Prolog for Swiper AI
         """
         state = {
             'player_location': None,
@@ -334,19 +334,19 @@ class PrologSession:
             return state
 
         try:
-            # 查询玩家位置
+            # Query player location
             output = self.send_command('player_location(X), write(X), nl', silent=True)
             match = re.search(r'(\w+)', output)
             if match and match.group(1) not in ['true', 'false', 'X', 'write', 'nl']:
                 state['player_location'] = match.group(1)
 
-            # 查询Swiper位置
+            # Query Swiper location
             output = self.send_command('swiper_location(X), write(X), nl', silent=True)
             match = re.search(r'(\w+)', output)
             if match and match.group(1) not in ['true', 'false', 'X', 'write', 'nl']:
                 state['swiper_location'] = match.group(1)
 
-            # 查询玩家背包
+            # Query player backpack
             output = self.send_command('player_backpack(L), write(L), nl', silent=True)
             list_match = re.search(r'\[([^\]]*)\]', output)
             if list_match:
@@ -354,16 +354,16 @@ class PrologSession:
                 if items_str.strip():
                     state['player_backpack'] = [i.strip() for i in items_str.split(',') if i.strip()]
 
-            # 查询房间物品
+            # Query room items
             output = self.send_command('findall((R,I), room_has_item(R,I), L), write(L), nl', silent=True)
-            # 解析 [(room1,item1),(room2,item2),...]
+            # Parse [(room1,item1),(room2,item2),...]
             pairs = re.findall(r'\((\w+),\s*(\w+)\)', output)
             for room, item in pairs:
                 if room not in state['room_items']:
                     state['room_items'][room] = []
                 state['room_items'][room].append(item)
 
-            # 查询藏匿物品
+            # Query hidden items
             output = self.send_command('findall((L,I), swiper_hidden_item(L,I), R), write(R), nl', silent=True)
             pairs = re.findall(r'\((\w+),\s*(\w+)\)', output)
             for loc, item in pairs:
@@ -371,7 +371,7 @@ class PrologSession:
                     state['hidden_items'][loc] = []
                 state['hidden_items'][loc].append(item)
 
-            # 查询Swiper是否被阻止(检查swiper_confused)
+            # Query if Swiper is blocked (check swiper_confused)
             output = self.send_command('(swiper_confused(_) -> write(blocked) ; write(ok)), nl', silent=True)
             if 'blocked' in output:
                 state['swiper_blocked'] = True
@@ -383,48 +383,48 @@ class PrologSession:
 
     def execute_swiper_action(self, action: dict) -> str:
         """
-        在Prolog中执行Swiper的行动
-        返回描述消息
+        Execute Swiper's action in Prolog
+        Returns description message
         """
         action_type = action.get('type', 'wait')
         message = action.get('message', '')
 
         try:
             if action_type == 'move':
-                # 更新Swiper位置
+                # Update Swiper location
                 new_loc = action.get('to')
                 if new_loc:
                     self.send_command(f"retract(swiper_location(_)), assert(swiper_location({new_loc}))", silent=True)
 
             elif action_type == 'steal':
-                # 从玩家背包偷窃
+                # Steal from player backpack
                 item = action.get('item')
                 if item:
-                    # 从玩家背包移除
+                    # Remove from player backpack
                     self.send_command(f"player_backpack(B), delete(B, {item}, NB), retract(player_backpack(B)), assert(player_backpack(NB))", silent=True)
-                    # 注意: 简化处理,偷窃后Swiper立即藏匿或逃跑
+                    # Note: Simplified handling, Swiper immediately hides or escapes after stealing
 
             elif action_type == 'take':
-                # Swiper从地上捡物品
+                # Swiper picks up item from ground
                 item = action.get('item')
                 loc = action.get('location')
                 if item and loc:
                     self.send_command(f"retract(room_has_item({loc}, {item}))", silent=True)
 
             elif action_type == 'hide':
-                # Swiper藏匿物品
+                # Swiper hides item
                 item = action.get('item')
                 loc = action.get('location')
                 if item and loc:
                     self.send_command(f"assert(swiper_hidden_item({loc}, {item}))", silent=True)
 
         except Exception as e:
-            message += f" (执行错误: {e})"
+            message += f" (Execution error: {e})"
 
         return message
 
     def close(self):
-        """关闭Prolog进程"""
+        """Close Prolog process"""
         if self.process:
             try:
                 self.process.stdin.write('halt.\n')
@@ -437,7 +437,7 @@ class PrologSession:
 
 
 def get_or_create_session():
-    """获取或创建Prolog会话"""
+    """Get or create Prolog session"""
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
 
@@ -451,9 +451,9 @@ def get_or_create_session():
 
 
 def cleanup_old_sessions():
-    """清理长时间不活跃的会话"""
+    """Clean up inactive sessions"""
     current_time = time.time()
-    timeout = 1800  # 30分钟
+    timeout = 1800  # 30 minutes
 
     to_remove = []
     for sid, ps in prolog_sessions.items():
@@ -466,7 +466,7 @@ def cleanup_old_sessions():
 
 
 # ============================================================
-# 玩家界面路由
+# Player Interface Routes
 # ============================================================
 
 @app.route('/')
@@ -476,15 +476,15 @@ def index():
 
 @app.route('/api/start', methods=['POST'])
 def start_game():
-    """启动游戏"""
+    """Start game"""
     cleanup_old_sessions()
 
-    # 关闭旧会话
+    # Close old session
     if 'session_id' in session and session['session_id'] in prolog_sessions:
         prolog_sessions[session['session_id']].close()
         del prolog_sessions[session['session_id']]
 
-    # 创建新会话
+    # Create new session
     session['session_id'] = str(uuid.uuid4())
     prolog_session = PrologSession(session['session_id'])
     prolog_sessions[session['session_id']] = prolog_session
@@ -505,73 +505,73 @@ def start_game():
 
 @app.route('/api/command', methods=['POST'])
 def send_command():
-    """发送游戏命令"""
+    """Send game command"""
     data = request.get_json()
     command = data.get('command', '').strip()
 
     if not command:
-        return jsonify({'output': '请输入命令！'})
+        return jsonify({'output': 'Please enter a command!'})
 
-    # 验证命令
+    # Validate command
     is_valid, error_msg = validate_command(command)
     if not is_valid:
-        return jsonify({'output': f'警告: {error_msg}'})
+        return jsonify({'output': f'Warning: {error_msg}'})
 
     if 'session_id' not in session or session['session_id'] not in prolog_sessions:
-        return jsonify({'output': '会话已过期，请点击"开始新游戏"。'})
+        return jsonify({'output': 'Session expired. Please click "Start New Game".'})
 
     prolog_session = prolog_sessions[session['session_id']]
 
-    # 执行玩家命令
+    # Execute player command
     output = prolog_session.send_command(command)
 
-    # 回合制: 检查是否需要执行Swiper回合
+    # Turn-based: Check if Swiper's turn needs to be executed
     swiper_message = ''
     if TURN_BASED_ENABLED:
-        # 解析命令名
+        # Parse command name
         cmd = command.strip()
         if cmd.endswith('.'):
             cmd = cmd[:-1]
         cmd_name = cmd.split('(')[0].lower() if '(' in cmd else cmd.lower()
 
-        # 如果是玩家行动命令,触发Swiper回合
+        # If player action command, trigger Swiper's turn
         if cmd_name in PLAYER_ACTION_COMMANDS:
             swiper_message = execute_swiper_turn(prolog_session)
 
-    # 合并输出
+    # Merge output
     if swiper_message:
-        output = output + '\n\n--- Swiper的回合 ---\n' + swiper_message
+        output = output + "\n\n--- Swiper's Turn ---\n" + swiper_message
 
     return jsonify({'output': output})
 
 
 def execute_swiper_turn(prolog_session) -> str:
     """
-    执行Swiper的回合
-    使用PDDL AI规划Swiper的行动并执行
+    Execute Swiper's turn
+    Uses PDDL AI to plan Swiper's action and execute it
     """
     try:
-        # 获取当前游戏状态
+        # Get current game state
         game_state = prolog_session.get_game_state_for_ai()
 
-        # 如果无法获取状态,跳过Swiper回合
+        # If unable to get state, skip Swiper's turn
         if not game_state.get('player_location'):
             return ''
 
-        # AI决策
+        # AI decision
         action = swiper_ai.get_action(game_state)
 
-        # 执行行动
+        # Execute action
         message = prolog_session.execute_swiper_action(action)
 
         return message
 
     except Exception as e:
-        return f'(Swiper AI错误: {e})'
+        return f'(Swiper AI error: {e})'
 
 
 # ============================================================
-# 管理员界面路由
+# Admin Interface Routes
 # ============================================================
 
 @app.route('/admin')
@@ -581,11 +581,11 @@ def admin():
 
 def query_prolog_state(prolog_session, use_cache=True):
     """
-    获取Prolog会话的游戏状态
-    use_cache: 如果为True，只返回缓存状态；如果为False，直接查询Prolog（静默模式）
+    Get game state from Prolog session
+    use_cache: If True, return cached state only; if False, query Prolog directly (silent mode)
     """
     if use_cache:
-        # 直接返回缓存的状态，避免干扰游戏
+        # Return cached state directly to avoid interfering with game
         return {
             'player_location': prolog_session.cached_state.get('player_location'),
             'swiper_location': prolog_session.cached_state.get('swiper_location'),
@@ -596,7 +596,7 @@ def query_prolog_state(prolog_session, use_cache=True):
             'game_time': prolog_session.cached_state.get('game_time', 100)
         }
 
-    # 直接查询Prolog（静默模式 - 不更新缓存，不影响游戏输出）
+    # Query Prolog directly (silent mode - don't update cache, don't affect game output)
     state = {
         'player_location': None,
         'swiper_location': None,
@@ -611,19 +611,19 @@ def query_prolog_state(prolog_session, use_cache=True):
         return state
 
     try:
-        # 查询玩家位置
+        # Query player location
         output = prolog_session.send_command('player_at(X), write(X), nl', silent=True)
         match = re.search(r'(\w+)', output)
         if match and match.group(1) not in ['true', 'false', 'X']:
             state['player_location'] = match.group(1)
 
-        # 查询Swiper位置
+        # Query Swiper location
         output = prolog_session.send_command('swiper_at(X), write(X), nl', silent=True)
         match = re.search(r'(\w+)', output)
         if match and match.group(1) not in ['true', 'false', 'X']:
             state['swiper_location'] = match.group(1)
 
-        # 查询背包
+        # Query backpack
         output = prolog_session.send_command('findall(I, player_has(I), L), write(L), nl', silent=True)
         list_match = re.search(r'\[([^\]]*)\]', output)
         if list_match:
@@ -639,7 +639,7 @@ def query_prolog_state(prolog_session, use_cache=True):
 
 @app.route('/admin/api/sessions')
 def admin_sessions():
-    """获取所有会话列表"""
+    """Get all sessions list"""
     sessions_data = []
     total_items = 0
     total_hidden = 0
@@ -647,14 +647,14 @@ def admin_sessions():
     for session_id, prolog_session in prolog_sessions.items():
         state = query_prolog_state(prolog_session, use_cache=True)
 
-        # 计算最后活动时间
+        # Calculate last activity time
         elapsed = time.time() - prolog_session.last_activity
         if elapsed < 60:
-            last_activity = f"{int(elapsed)}秒前"
+            last_activity = f"{int(elapsed)}s ago"
         elif elapsed < 3600:
-            last_activity = f"{int(elapsed/60)}分钟前"
+            last_activity = f"{int(elapsed/60)}m ago"
         else:
-            last_activity = f"{int(elapsed/3600)}小时前"
+            last_activity = f"{int(elapsed/3600)}h ago"
 
         sessions_data.append({
             'session_id': session_id,
@@ -682,20 +682,20 @@ def admin_sessions():
 
 @app.route('/admin/api/shell', methods=['POST'])
 def admin_shell():
-    """管理员直接执行Prolog命令（无过滤）"""
+    """Admin direct Prolog command execution (no filtering)"""
     data = request.get_json()
     session_id = data.get('session_id')
     command = data.get('command', '').strip()
 
     if not session_id or session_id not in prolog_sessions:
-        return jsonify({'error': '会话不存在'})
+        return jsonify({'error': 'Session not found'})
 
     if not command:
-        return jsonify({'error': '请输入命令'})
+        return jsonify({'error': 'Please enter a command'})
 
     prolog_session = prolog_sessions[session_id]
 
-    # 管理员命令不经过验证，直接发送到Prolog
+    # Admin commands bypass validation, send directly to Prolog
     output = prolog_session.send_command(command, silent=True)
 
     return jsonify({'output': output})
@@ -703,14 +703,14 @@ def admin_shell():
 
 @app.route('/admin/api/new_session', methods=['POST'])
 def admin_new_session():
-    """管理员创建新的Prolog会话"""
+    """Admin creates new Prolog session"""
     session_id = str(uuid.uuid4())
     prolog_session = PrologSession(session_id)
     prolog_sessions[session_id] = prolog_session
 
     try:
         prolog_session.start()
-        # 自动启动游戏
+        # Auto-start game
         output = prolog_session.send_command('start')
         return jsonify({
             'session_id': session_id,
@@ -724,31 +724,31 @@ def admin_new_session():
 
 @app.route('/admin/api/kill', methods=['POST'])
 def admin_kill_session():
-    """管理员终止会话"""
+    """Admin terminates session"""
     data = request.get_json()
     session_id = data.get('session_id')
 
     if not session_id or session_id not in prolog_sessions:
-        return jsonify({'error': '会话不存在'})
+        return jsonify({'error': 'Session not found'})
 
     prolog_sessions[session_id].close()
     del prolog_sessions[session_id]
 
-    return jsonify({'message': '会话已终止'})
+    return jsonify({'message': 'Session terminated'})
 
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("朵拉的热带探险 - Prolog Web版")
+    print("Dora's Tropical Adventure - Prolog Web Version")
     print("=" * 60)
     print()
-    print("  这是真正的Prolog游戏！")
-    print("  运行 dora_adventure.pl (SWI-Prolog)")
+    print("  This is a real Prolog game!")
+    print("  Running dora_adventure.pl (SWI-Prolog)")
     print()
-    print("  请访问: http://localhost:5002")
-    print("  管理员: http://localhost:5002/admin")
+    print("  Visit: http://localhost:5002")
+    print("  Admin: http://localhost:5002/admin")
     print()
-    print("  确保已安装 SWI-Prolog:")
+    print("  Make sure SWI-Prolog is installed:")
     print("     brew install swi-prolog")
     print()
     print("=" * 60)

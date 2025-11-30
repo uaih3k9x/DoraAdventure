@@ -1,4 +1,4 @@
-// 朵拉的热带探险 - 游戏前端脚本
+// Dora's Tropical Adventure - Game Frontend Script
 
 const outputDiv = document.getElementById('output');
 const commandInput = document.getElementById('command');
@@ -8,12 +8,12 @@ function appendOutput(text, isCommand = false) {
     if (isCommand) {
         outputDiv.innerHTML += '\n<span class="command">&gt; ' + escapeHtml(text) + '</span>';
     } else {
-        // 检查是否包含Swiper回合分隔符
+        // Check if contains Swiper turn separator
         if (text.includes('--- Swiper')) {
             const parts = text.split('--- Swiper');
-            // 玩家行动输出
+            // Player action output
             outputDiv.innerHTML += '\n' + escapeHtml(parts[0]);
-            // Swiper回合输出(高亮显示)
+            // Swiper turn output (highlighted)
             if (parts[1]) {
                 outputDiv.innerHTML += '\n<span class="swiper-turn">--- Swiper' + escapeHtml(parts[1]) + '</span>';
             }
@@ -48,12 +48,12 @@ async function startGame() {
         });
         const data = await response.json();
         if (data.success) {
-            setOutput(data.output || '游戏已启动！输入 start. 开始游戏');
+            setOutput(data.output || 'Game started! Type start. to begin');
         } else {
-            appendOutput('启动失败: ' + data.error);
+            appendOutput('Failed to start: ' + data.error);
         }
     } catch (error) {
-        appendOutput('错误: ' + error.message);
+        appendOutput('Error: ' + error.message);
     }
     showLoading(false);
     commandInput.focus();
@@ -78,7 +78,7 @@ async function sendCommand() {
             appendOutput(data.output);
         }
     } catch (error) {
-        appendOutput('错误: ' + error.message);
+        appendOutput('Error: ' + error.message);
     }
     showLoading(false);
     commandInput.focus();

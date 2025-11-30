@@ -1,89 +1,89 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>朵拉的热带探险 - Prolog版</title>
+    <title>Dora's Tropical Adventure - Prolog Edition</title>
     <link rel="stylesheet" href="/static/css/game.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>朵拉的热带探险</h1>
-            <div class="subtitle">Prolog文本冒险游戏 - v5 Boots猴子系统</div>
-            <div class="prolog-badge">真正的SWI-Prolog运行</div>
+            <h1>Dora's Tropical Adventure</h1>
+            <div class="subtitle">Prolog Text Adventure Game - v5 Boots Monkey System</div>
+            <div class="prolog-badge">Powered by SWI-Prolog</div>
         </div>
 
         <div class="main-area">
             <div>
                 <div class="game-output" id="output">
-╔════════════════════════════════════════════════════════════╗
-║          欢迎来到《朵拉的热带探险》！                      ║
-╠════════════════════════════════════════════════════════════╣
-║                                                            ║
-║  这是一个基于 SWI-Prolog 的文本冒险游戏。                 ║
-║  游戏逻辑完全由 Prolog 驱动！                             ║
-║                                                            ║
-║  游戏特色：                                                ║
-║  * 探索四个神秘区域                                       ║
-║  * 收集12种专属道具                                       ║
-║  * 阻止狐狸Swiper的偷窃                                   ║
-║  * Boots猴子同伴搜索系统                                  ║
-║  * 隐藏彩蛋 - 上天礼物！                                  ║
-║                                                            ║
-║  点击 "开始新游戏" 启动 Prolog 解释器                     ║
-╚════════════════════════════════════════════════════════════╝
++==============================================================+
+|          Welcome to Dora's Tropical Adventure!               |
++==============================================================+
+|                                                              |
+|  This is a text adventure game powered by SWI-Prolog.        |
+|  All game logic is driven by Prolog!                         |
+|                                                              |
+|  Game Features:                                              |
+|  * Explore four mysterious areas                             |
+|  * Collect 12 unique items                                   |
+|  * Stop Swiper the fox from stealing                         |
+|  * Boots monkey companion search system                      |
+|  * Hidden Easter Egg - Heaven's Gift!                        |
+|                                                              |
+|  Click "Start New Game" to launch the Prolog interpreter     |
++==============================================================+
                 </div>
 
-                <div class="loading" id="loading">Prolog处理中...</div>
+                <div class="loading" id="loading">Prolog processing...</div>
 
                 <div class="input-area">
                     <input type="text" id="command"
-                           placeholder="输入Prolog命令: go(north). take(item). look."
+                           placeholder="Enter Prolog command: go(north). take(item). look."
                            onkeypress="handleKeyPress(event)"
                            autocomplete="off">
-                    <button class="btn-send" onclick="sendCommand()">发送</button>
+                    <button class="btn-send" onclick="sendCommand()">Send</button>
                 </div>
             </div>
 
             <div class="side-panel">
                 <div class="panel">
-                    <button class="btn-start" onclick="startGame()">开始新游戏</button>
+                    <button class="btn-start" onclick="startGame()">Start New Game</button>
                 </div>
 
                 <div class="panel">
-                    <h3>方向控制</h3>
+                    <h3>Direction Controls</h3>
                     <div class="direction-pad">
-                        <button class="dir-btn north" onclick="quickCommand('go(north)')">北</button>
-                        <button class="dir-btn west" onclick="quickCommand('go(west)')">西</button>
-                        <button class="dir-btn center" onclick="quickCommand('look')">看</button>
-                        <button class="dir-btn east" onclick="quickCommand('go(east)')">东</button>
-                        <button class="dir-btn south" onclick="quickCommand('go(south)')">南</button>
+                        <button class="dir-btn north" onclick="quickCommand('go(north)')">N</button>
+                        <button class="dir-btn west" onclick="quickCommand('go(west)')">W</button>
+                        <button class="dir-btn center" onclick="quickCommand('look')">Look</button>
+                        <button class="dir-btn east" onclick="quickCommand('go(east)')">E</button>
+                        <button class="dir-btn south" onclick="quickCommand('go(south)')">S</button>
                     </div>
                 </div>
 
                 <div class="panel">
-                    <h3>快捷命令</h3>
+                    <h3>Quick Commands</h3>
                     <div class="quick-commands">
-                        <button class="quick-btn" onclick="quickCommand('look')">查看环境</button>
-                        <button class="quick-btn" onclick="quickCommand('inventory')">查看背包</button>
-                        <button class="quick-btn" onclick="quickCommand('status')">游戏状态</button>
-                        <button class="quick-btn" onclick="quickCommand('help')">帮助</button>
-                        <button class="quick-btn" onclick="quickCommand('boots_search')">Boots搜索</button>
-                        <button class="quick-btn" onclick="quickCommand('stop_swiper')">阻止Swiper</button>
+                        <button class="quick-btn" onclick="quickCommand('look')">Look Around</button>
+                        <button class="quick-btn" onclick="quickCommand('inventory')">Inventory</button>
+                        <button class="quick-btn" onclick="quickCommand('status')">Status</button>
+                        <button class="quick-btn" onclick="quickCommand('help')">Help</button>
+                        <button class="quick-btn" onclick="quickCommand('boots_search')">Boots Search</button>
+                        <button class="quick-btn" onclick="quickCommand('stop_swiper')">Stop Swiper</button>
                     </div>
                 </div>
 
                 <div class="panel">
-                    <h3>命令说明</h3>
+                    <h3>Command Reference</h3>
                     <div class="help-text">
-                        <p><code>go(方向)</code> - 移动</p>
-                        <p><code>take(物品)</code> - 拾取</p>
-                        <p><code>drop(物品)</code> - 丢弃</p>
-                        <p><code>use(物品)</code> - 使用</p>
-                        <p><code>boots_search</code> - 让Boots搜索</p>
+                        <p><code>go(direction)</code> - Move</p>
+                        <p><code>take(item)</code> - Pick up</p>
+                        <p><code>drop(item)</code> - Drop</p>
+                        <p><code>use(item)</code> - Use</p>
+                        <p><code>boots_search</code> - Let Boots search</p>
                         <p style="margin-top: 10px; color: #888;">
-                            命令末尾的点号会自动添加
+                            Period at end of command is auto-added
                         </p>
                     </div>
                 </div>
