@@ -32,7 +32,8 @@ function setOutput(text) {
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
-    return div.innerHTML;
+    // Convert newlines to <br> tags for proper display
+    return div.innerHTML.replace(/\n/g, '<br>');
 }
 
 function showLoading(show) {

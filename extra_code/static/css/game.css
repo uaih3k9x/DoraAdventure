@@ -1,0 +1,481 @@
+/* Dora's Tropical Adventure - 朵拉主题样式 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    /* 经典朵拉背景：蓝天过渡到草地 */
+    background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #74C043 40%, #56ab2f 100%);
+    font-family: 'Verdana', 'Comic Sans MS', 'Microsoft YaHei', sans-serif;
+    min-height: 100vh;
+    color: #333;
+    padding: 20px;
+    background-attachment: fixed;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    /* 增加整体的大白框，像一本打开的故事书 */
+    background: rgba(255, 255, 255, 0.4);
+    padding: 20px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 20px;
+    border: 4px solid #F57D25; /* 朵拉橙 */
+    box-shadow: 0 5px 0 #d4600e;
+}
+
+h1 {
+    font-size: 2.8em;
+    color: #D6006E; /* 朵拉粉 */
+    text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1);
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    color: #8860D0; /* 背包紫 */
+    margin-top: 5px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.prolog-badge {
+    display: inline-block;
+    background: #FFDD00; /* 星星黄 */
+    color: #F57D25;
+    padding: 5px 20px;
+    border-radius: 50px;
+    margin-top: 8px;
+    font-weight: 800;
+    border: 2px solid #F57D25;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+}
+
+.main-area {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 25px;
+}
+
+/* 游戏输出区 - 羊皮纸地图风格 */
+.game-output {
+    background: #FEF9E7; /* 羊皮纸米色 */
+    border: 4px solid #8860D0; /* 背包紫边框 */
+    border-radius: 20px;
+    padding: 25px;
+    min-height: 450px;
+    max-height: 500px;
+    overflow-y: auto;
+    /* 保持等宽字体以对齐ASCII画，但颜色改深棕色 */
+    font-family: 'Consolas', 'Courier New', monospace; 
+    color: #4a3b2a; 
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.6;
+    box-shadow: inset 0 0 20px rgba(136, 96, 208, 0.1);
+}
+
+.game-output .system {
+    color: #D6006E; /* 系统消息用粉色 */
+}
+
+.game-output .command {
+    color: #2E86C1; /* 玩家指令用蓝色 */
+    font-weight: bold;
+    background: rgba(46, 134, 193, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: block; /* 强制独占一行 */
+}
+
+.game-output .swiper-turn {
+    color: #fff;
+    background: #F57D25; /* 捣蛋鬼狐狸橙 */
+    display: block;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 15px;
+    border: 2px dashed #fff;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+/* 侧边栏面板 - 卡片风格 */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.panel {
+    background: #fff;
+    border-radius: 20px;
+    padding: 18px;
+    border: 3px solid #74C043; /* 丛林绿 */
+    box-shadow: 0 5px 0 #5ba032;
+}
+
+.panel h3 {
+    color: #74C043;
+    text-align: center;
+    border-bottom: 2px dashed #74C043;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: 800;
+}
+
+/* 输入区域 */
+.input-area {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 15px 20px;
+    font-size: 16px;
+    border: 3px solid #8860D0;
+    border-radius: 50px; /* 胶囊形状 */
+    background: #fff;
+    color: #333;
+    font-family: 'Verdana', monospace;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #D6006E;
+    box-shadow: 0 0 0 4px rgba(214, 0, 110, 0.2);
+}
+
+input[type="text"]::placeholder {
+    color: #888;
+}
+
+/* 按钮通用样式 */
+button {
+    font-family: 'Verdana', sans-serif;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+button:active {
+    transform: translateY(3px) !important;
+    box-shadow: none !important;
+}
+
+.btn-send {
+    background: #8860D0;
+    color: #fff;
+    min-width: 100px;
+    border-bottom: 4px solid #5e3da6;
+    border-radius: 50px;
+}
+
+.btn-send:hover {
+    background: #9a75db;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #5e3da6;
+}
+
+.btn-start {
+    background: #FFDD00;
+    color: #d4600e;
+    width: 100%;
+    font-size: 1.3em;
+    padding: 15px;
+    border-bottom: 5px solid #d4a000;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+}
+
+.btn-start:hover {
+    background: #ffe44d;
+    transform: scale(1.02);
+}
+
+/* 快捷指令按钮 - 糖果色网格 */
+.quick-commands {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.quick-btn {
+    padding: 12px 5px;
+    font-size: 12px;
+    background: #56B4E9; /* Boots 猴子蓝 */
+    color: #fff;
+    border-bottom: 3px solid #2d8bc1;
+    border-radius: 12px;
+}
+
+.quick-btn:hover {
+    background: #6ec2f0;
+    margin-top: -2px;
+    border-bottom-width: 5px;
+}
+
+/* 方向键 - 游戏手柄风格 */
+.direction-pad {
+    display: grid;
+    grid-template-areas:
+        ". north ."
+        "west center east"
+        ". south .";
+    gap: 8px;
+    margin: 10px 0;
+    background: #eef;
+    padding: 10px;
+    border-radius: 50%;
+    border: 3px solid #dde;
+}
+
+.dir-btn {
+    padding: 15px 0;
+    font-size: 1.2em;
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+}
+
+.dir-btn.north { grid-area: north; background: #FF6B6B; }
+.dir-btn.south { grid-area: south; background: #FF6B6B; }
+.dir-btn.east { grid-area: east; background: #4ECDC4; }
+.dir-btn.west { grid-area: west; background: #4ECDC4; }
+.dir-btn.center {
+    grid-area: center;
+    background: #FFE66D;
+    color: #555;
+    font-size: 0.8em;
+    border-radius: 50%;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 加载动画 */
+.loading {
+    display: none;
+    text-align: center;
+    color: #D6006E;
+    padding: 10px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.loading.show {
+    display: block;
+}
+
+.help-text {
+    font-size: 0.9em;
+    color: #666;
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.help-text code {
+    background: #fff;
+    color: #D6006E;
+    border: 1px solid #ddd;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #8860D0; 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #D6006E; 
+}
+
+/* --- 新增：欢迎卡片样式 --- */
+.welcome-card {
+    background: #fff;
+    border: 3px dashed #F57D25; /* 朵拉橙色虚线 */
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.welcome-title {
+    color: #D6006E; /* 朵拉粉 */
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #FFE66D;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+.welcome-content {
+    color: #333;
+    font-family: 'Verdana', sans-serif; /* 使用非等宽字体，更易读 */
+    line-height: 1.8;
+    text-align: left;
+    display: inline-block;
+}
+
+.welcome-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.welcome-content li {
+    margin: 8px 0;
+}
+
+.welcome-footer {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #2E86C1;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .main-area {
+        grid-template-columns: 1fr;
+    }
+    .header h1 {
+        font-size: 1.8em;
+    }
+}
+
+/* --- 新增：人物立绘样式 --- */
+
+.character-wrapper {
+    /* 容器不占据实际布局空间，只用于管理层级 */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    z-index: 100; /* 确保在背景之上 */
+    pointer-events: none; /* 关键：允许鼠标点击穿透图片，不影响背后按钮 */
+}
+
+.character {
+    position: absolute;
+    bottom: 0; /* 紧贴底部 */
+    height: 350px; /* 设置合适的高度，根据图片实际大小调整 */
+    width: auto;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); /* 给人物加一点阴影，更有立体感 */
+    transition: transform 0.3s ease;
+}
+
+/* 朵拉在左边 */
+.character.dora {
+    left: 0%; /* 距离左边缘的距离 */
+    transform: rotate(5deg); /* 稍微歪一点头，显得可爱 */
+}
+
+/* Boots 在右边 */
+.character.boots {
+    right: 0%; /* 距离右边缘的距离 */
+    /* 如果原图Boots朝右，需要水平翻转让他看向屏幕中心 */
+    transform: scaleX(-1) rotate(5deg); 
+    height: 200px;
+    width: auto;
+}
+
+/* 动画效果：鼠标悬停时跳动一下 */
+/* 注意：需要开启 pointer-events: auto 才能触发hover，但这会阻挡点击 */
+/* 这里我们做一个简单的入场动画即可 */
+@keyframes popUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.character {
+    animation: popUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- 响应式设计 --- */
+/* 当屏幕宽度小于 1300px 时（比如笔记本或平板），缩小人物 */
+@media (max-width: 1300px) {
+    .character {
+        height: 250px;
+    }
+}
+
+/* 当屏幕宽度小于 1000px 时（手机），隐藏人物，因为会遮挡文字 */
+@media (max-width: 1000px) {
+    .character {
+        display: none;
+    }
+}
+
+/* --- 新增：地图区域样式 --- */
+
+.map-display-area {
+    margin-top: 25px;
+    background: #FEF9E7; /* 羊皮纸米色背景 */
+    padding: 15px;
+    border-radius: 20px;
+    border: 4px solid #F57D25; /* 朵拉橙色边框 */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* 阴影增加立体感 */
+    text-align: center;
+    position: relative;
+}
+
+.map-header {
+    color: #D6006E; /* 朵拉粉色标题 */
+    font-weight: 800;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+.game-map-image {
+    width: 100%;      /* 宽度自适应容器 */
+    height: auto;     /* 高度自动 */
+    border-radius: 12px;
+    border: 3px solid #8860D0; /* 背包紫色内边框 */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    display: block;   /* 防止图片底部出现空隙 */
+    transition: transform 0.3s ease;
+}
+
+/* 鼠标悬停时，地图轻微放大，方便查看 */
+.game-map-image:hover {
+    transform: scale(1.02);
+    cursor: pointer;
+}
+
+/* 响应式调整：手机上地图不要太大 */
+@media (max-width: 768px) {
+    .map-display-area {
+        margin-top: 15px;
+        padding: 10px;
+    }
+}

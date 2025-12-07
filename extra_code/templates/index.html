@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dora's Tropical Adventure - Prolog Edition</title>
+    <link rel="stylesheet" href="/static/css/game.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- 加个星星Emoji -->
+            <h1>⭐ Dora's Tropical Adventure ⭐</h1>
+            <div class="subtitle">Interactive Prolog Story - v5 Boots System</div>
+            <div class="prolog-badge">🧠 Powered by SWI-Prolog</div>
+        </div>
+
+        <div class="main-area">
+            <div>
+                <div class="game-output" id="output">
+                    <!-- 替换开始：使用HTML卡片代替字符画 -->
+                    <div class="welcome-card">
+                        <div class="welcome-title">
+                            🌟 Welcome to Dora's Tropical Adventure! 🌟
+                        </div>
+                        
+                        <div class="welcome-content">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>Hola! I'm Dora!</strong><br>
+                                Let's go on a Prolog adventure together!
+                            </p>
+                            
+                            <ul>
+                                <li>🌴 <strong>Explore</strong> four mysterious areas</li>
+                                <li>🎒 <strong>Collect</strong> 12 items for your Backpack</li>
+                                <li>🦊 <strong>Stop Swiper</strong> the fox from stealing!</li>
+                                <li>🐵 <strong>Ask Boots</strong> the monkey for help</li>
+                                <li>✨ <strong>Find</strong> the hidden Heaven's Gift!</li>
+                            </ul>
+                        </div>
+                
+                        <div class="welcome-footer">
+                            Click "Start New Game" to start our adventure!
+                        </div>
+                    </div>
+                    <!-- 替换结束 -->
+                </div>
+
+                <div class="loading" id="loading">✨ Magic happens... (Prolog processing)</div>
+
+                <div class="input-area">
+                    <input type="text" id="command"
+                           placeholder="What should we do? (e.g., go(north). take(item). look.)"
+                           onkeypress="handleKeyPress(event)"
+                           autocomplete="off">
+                    <!-- 按钮文字变化 -->
+                    <button class="btn-send" onclick="sendCommand()">Send</button>
+                </div>
+
+                <div class="map-display-area">
+                    <div class="map-header">🗺️ I'm the Map!</div>
+                    <img src="/static/images/map.jpg" alt="Game Map" class="game-map-image">
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <div class="panel">
+                    <!-- 大按钮文字变化 -->
+                    <button class="btn-start" onclick="startGame()">Start New Game</button>
+                </div>
+
+                <div class="panel">
+                    <h3>🗺️ Directions</h3>
+                    <div class="direction-pad">
+                        <!-- 方向键增加箭头 -->
+                        <button class="dir-btn north" onclick="quickCommand('go(north)')">⬆️ N</button>
+                        <button class="dir-btn west" onclick="quickCommand('go(west)')">⬅️ W</button>
+                        <button class="dir-btn center" onclick="quickCommand('look')">👀 Look</button>
+                        <button class="dir-btn east" onclick="quickCommand('go(east)')">E ➡️</button>
+                        <button class="dir-btn south" onclick="quickCommand('go(south)')">S ⬇️</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🎒 Backpack & Actions</h3>
+                    <div class="quick-commands">
+                        <button class="quick-btn" onclick="quickCommand('look')">👀 Look</button>
+                        <button class="quick-btn" onclick="quickCommand('inventory')">🎒 Backpack</button>
+                        <button class="quick-btn" onclick="quickCommand('status')">❤️ Status</button>
+                        <button class="quick-btn" onclick="quickCommand('help')">❓ Help</button>
+                        <button class="quick-btn" onclick="quickCommand('boots_search')">🐵 Boots Help</button>
+                        <button class="quick-btn" onclick="quickCommand('stop_swiper')">🦊 Stop Swiper!</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>📖 Magic Words</h3>
+                    <div class="help-text">
+                        <p><code>go(direction)</code> - Move</p>
+                        <p><code>take(item)</code> - Pick up</p>
+                        <p><code>drop(item)</code> - Drop</p>
+                        <p><code>use(item)</code> - Use</p>
+                        <p><code>boots_search</code> - Let Boots search</p>
+                        <p style="margin-top: 10px; color: #D6006E; font-size: 0.8em;">
+                            Period at end of command is auto-added
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="character-wrapper">
+        <img src="/static/images/dora_transparent.png" class="character dora" alt="Dora">
+        <img src="/static/images/boots_transparent.png" class="character boots" alt="Boots">
+    </div>
+
+    <script src="/static/js/game.js"></script>
+</body>
+</html>

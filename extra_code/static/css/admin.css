@@ -1,0 +1,513 @@
+/* 朵拉的热带探险 - 管理员后台 (Dora Theme) */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    /* 复用主游戏的蓝天草地渐变背景 */
+    background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #74C043 40%, #56ab2f 100%);
+    font-family: 'Verdana', 'Comic Sans MS', 'Microsoft YaHei', sans-serif;
+    min-height: 100vh;
+    color: #4a3b2a; /* 深棕色字体 */
+    overflow: hidden; /* 防止双重滚动条 */
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    /* 给整个容器加个半透明白底，像一个大画板 */
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px);
+}
+
+/* ============================================================ */
+/* 侧边栏样式 */
+/* ============================================================ */
+
+.sidebar {
+    width: 280px;
+    background: #fff;
+    border-right: 4px solid #F57D25; /* 朵拉橙边框 */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 2px dashed #F57D25;
+    background: #FFDD00; /* 星星黄 */
+    text-align: center;
+}
+
+.sidebar-header h2 {
+    color: #D6006E; /* 朵拉粉 */
+    font-size: 18px;
+    margin-bottom: 5px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.session-list {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.session-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 5px solid transparent;
+}
+
+.session-item:hover {
+    background: #FFF9C4; /* 浅黄色高亮 */
+    border-left-color: #F57D25;
+}
+
+.session-item.active {
+    background: #E8F5E9; /* 浅绿色背景 */
+    border-left-color: #74C043;
+}
+
+.session-item .sid {
+    font-weight: bold;
+    color: #8860D0; /* 紫色ID */
+    font-family: monospace;
+}
+
+.session-item .status {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.status-alive { background: #74C043; border: 2px solid #fff; } /* 绿色 */
+.status-dead { background: #FF6B6B; border: 2px solid #fff; } /* 红色 */
+
+/* ============================================================ */
+/* 主内容区域 */
+/* ============================================================ */
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.6);
+}
+
+.toolbar {
+    padding: 10px 15px;
+    background: #fff;
+    border-bottom: 3px solid #8860D0; /* 紫色分隔线 */
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* 通用按钮样式 - 糖果风格 */
+button {
+    font-family: 'Verdana', sans-serif;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+}
+
+button:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.toolbar button {
+    padding: 8px 15px;
+    background: #56B4E9; /* Boots蓝 */
+    color: white;
+    font-size: 12px;
+}
+
+.toolbar button:hover {
+    background: #4aa0d1;
+}
+
+.toolbar button.danger {
+    background: #FF6B6B;
+    color: white;
+}
+
+.toolbar button.danger:hover {
+    background: #ff5252;
+}
+
+.toolbar .session-info {
+    flex: 1;
+    font-size: 14px;
+    font-weight: bold;
+    color: #8860D0;
+}
+
+/* ============================================================ */
+/* Shell / 控制台区域 */
+/* ============================================================ */
+
+.shell-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 15px;
+}
+
+/* 将原本黑色的控制台改为羊皮纸风格 */
+.shell-output {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #FEF9E7; /* 羊皮纸米色 */
+    border: 4px solid #8860D0;
+    border-radius: 15px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #4a3b2a;
+    box-shadow: inset 0 0 15px rgba(136, 96, 208, 0.1);
+}
+
+.shell-output .prompt {
+    color: #D6006E; /* 粉色提示符 */
+    font-weight: bold;
+}
+
+.shell-output .command {
+    color: #2E86C1; /* 蓝色命令 */
+    font-weight: bold;
+}
+
+.shell-output .output {
+    color: #4a3b2a; /* 深棕色输出 */
+}
+
+.shell-output .error {
+    color: #FF6B6B; /* 红色错误 */
+    font-weight: bold;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+.shell-output .system {
+    color: #F57D25; /* 橙色系统信息 */
+    font-style: italic;
+}
+
+.shell-input-area {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 50px; /* 胶囊形状 */
+    border: 3px solid #74C043;
+    display: flex;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.shell-input-area .prompt-label {
+    color: #74C043;
+    font-weight: bold;
+    line-height: 36px;
+    padding-left: 10px;
+    font-size: 16px;
+}
+
+.shell-input-area input {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: #333;
+    font-family: 'Consolas', monospace;
+    font-size: 15px;
+}
+
+.shell-input-area input:focus {
+    outline: none;
+}
+
+.shell-input-area button {
+    padding: 8px 20px;
+    background: #74C043;
+    color: #fff;
+    border-radius: 30px;
+}
+
+.shell-input-area button:hover {
+    background: #62a537;
+}
+
+/* ============================================================ */
+/* 快捷查询区 */
+/* ============================================================ */
+
+.quick-queries {
+    padding: 15px;
+    background: #E0F7FA;
+    border-bottom: 2px dashed #87CEEB;
+}
+
+.quick-queries label {
+    font-size: 12px;
+    color: #2E86C1;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.quick-queries button {
+    padding: 6px 12px;
+    margin-right: 8px;
+    margin-bottom: 5px;
+    background: #fff;
+    border: 2px solid #56B4E9;
+    color: #56B4E9;
+    border-radius: 15px;
+    font-size: 11px;
+}
+
+.quick-queries button:hover {
+    background: #56B4E9;
+    color: white;
+}
+
+/* ============================================================ */
+/* 按钮与模式切换 */
+/* ============================================================ */
+
+.new-session-btn {
+    margin: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #74C043, #56ab2f);
+    color: #fff;
+    font-size: 14px;
+    width: calc(100% - 30px);
+    box-shadow: 0 4px 0 #3e8e41;
+}
+
+.new-session-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #3e8e41;
+}
+
+.mode-switch {
+    display: flex;
+    margin: 10px 15px;
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 15px;
+    gap: 5px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    color: #888;
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+.mode-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.mode-btn.active {
+    background: #fff;
+    color: #D6006E;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* ============================================================ */
+/* GUI 模式样式 (卡片化) */
+/* ============================================================ */
+
+.gui-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 15px;
+}
+
+.gui-status-panel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding-bottom: 15px;
+}
+
+.status-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    border: 3px solid #56B4E9;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+}
+
+.status-card h4 {
+    color: #56B4E9;
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-bottom: 2px dashed #eee;
+    padding-bottom: 5px;
+    text-align: center;
+}
+
+.status-card div {
+    font-size: 13px;
+    color: #555;
+    margin: 6px 0;
+    font-weight: 500;
+}
+
+/* 捣蛋鬼卡片特别样式 */
+.status-card.swiper-card {
+    border-color: #F57D25;
+    background: #FFF3E0;
+}
+
+.status-card.swiper-card h4 {
+    color: #F57D25;
+}
+
+.gui-output {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #fff;
+    border: 3px solid #ddd;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.gui-output .command {
+    color: #58a6ff;
+}
+
+.gui-output .output {
+    color: #c9d1d9;
+}
+
+.gui-output .error {
+    color: #f85149;
+}
+
+.gui-output .system {
+    color: #8b949e;
+    font-style: italic;
+}
+
+.gui-output .swiper-turn {
+    color: #fff;
+    background: #F57D25;
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 2px dashed #fff;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+}
+
+.gui-commands {
+    padding: 15px;
+    background: #fff;
+    border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    border: 3px solid #eee;
+    align-items: center;
+}
+
+.command-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f9f9f9;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.command-group label {
+    font-size: 12px;
+    color: #8860D0;
+    font-weight: bold;
+}
+
+.command-group button {
+    padding: 6px 12px;
+    background: #fff;
+    border: 2px solid #8860D0;
+    color: #8860D0;
+    border-radius: 10px;
+}
+
+.command-group button:hover {
+    background: #8860D0;
+    color: white;
+}
+
+.command-group input {
+    padding: 6px 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    width: 100px;
+}
+
+/* ============================================================ */
+/* 没有会话时的提示 */
+/* ============================================================ */
+
+.no-session {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8860D0;
+    background: rgba(255,255,255,0.5);
+    margin: 15px;
+    border-radius: 20px;
+    border: 4px dashed #8860D0;
+}
+
+.no-session div {
+    text-align: center;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05); 
+}
+::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #8860D0; 
+}

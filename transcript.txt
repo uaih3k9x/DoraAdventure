@@ -1,0 +1,260 @@
+============================================================
+Dora's Tropical Adventure - Game Transcript
+============================================================
+This transcript shows a complete game session demonstrating
+the Prolog-based text adventure with PDDL-powered Swiper AI.
+============================================================
+
+SESSION START: 2024-12-03 14:30:00
+============================================================
+
+?- start.
+------------------------------------------------------------
+============================================================
+  Welcome to Dora's Tropical Adventure!
+============================================================
+
+Hola! I'm Dora the Explorer!
+Today we're going on an exciting adventure in the tropical forest!
+
+But watch out - Swiper the Fox is nearby!
+If you see him, say 'Swiper, no swiping!' to stop him!
+
+My friend Boots the Monkey will help us find hidden items!
+
+Our mission: Collect special items and find Heaven's Gift!
+
+Let's go! Type 'look' to see where we are!
+============================================================
+
+------------------------------------------------------------
+
+?- look.
+------------------------------------------------------------
+=== Jungle Entrance ===
+The entrance to the dense tropical jungle.
+Sunlight filters through the canopy above.
+A worn path leads deeper into the forest.
+
+You can go: north
+
+Items here: herbal_medicine
+
+------------------------------------------------------------
+
+?- take(herbal_medicine).
+------------------------------------------------------------
+You picked up: herbal_medicine
+Added to your backpack!
+
+--- Swiper's Turn ---
+You hear Swiper moving nearby...
+
+------------------------------------------------------------
+
+?- go(north).
+------------------------------------------------------------
+You moved from jungle_entrance to jungle_path.
+
+=== Jungle Path ===
+A winding path through the dense jungle.
+Exotic birds call from the treetops.
+The path continues in multiple directions.
+
+You can go: south, north, east
+
+Items here: sharp_machete
+
+--- Swiper's Turn ---
+Swiper sneaks to deep_forest...
+
+------------------------------------------------------------
+
+?- take(sharp_machete).
+------------------------------------------------------------
+You picked up: sharp_machete
+Added to your backpack!
+
+--- Swiper's Turn ---
+Swiper wanders somewhere...
+
+------------------------------------------------------------
+
+?- go(north).
+------------------------------------------------------------
+You moved from jungle_path to deep_forest.
+
+=== Deep Forest ===
+The heart of the jungle, dark and mysterious.
+Ancient trees tower overhead.
+Strange sounds echo from the shadows.
+
+You can go: south, north
+
+Items here: ancient_totem
+
+WARNING: Swiper is here!
+
+--- Swiper's Turn ---
+Swiper suddenly appears and steals sharp_machete from your backpack!
+
+------------------------------------------------------------
+
+?- stop_swiper.
+------------------------------------------------------------
+You shout: "Swiper, no swiping!"
+Swiper: "Oh, maaaan!"
+Swiper is confused and drops what he's carrying!
+
+Item recovered: sharp_machete
+
+--- Swiper's Turn ---
+Swiper: "Oh man!" (blocked)
+
+------------------------------------------------------------
+
+?- take(ancient_totem).
+------------------------------------------------------------
+You picked up: ancient_totem
+Added to your backpack!
+
+--- Swiper's Turn ---
+Swiper watches your movements...
+
+------------------------------------------------------------
+
+?- inventory.
+------------------------------------------------------------
+=== Your Backpack ===
+- herbal_medicine
+- sharp_machete
+- ancient_totem
+
+Total items: 3
+
+------------------------------------------------------------
+
+?- status.
+------------------------------------------------------------
+=== Game Status ===
+Current location: deep_forest
+Score: 30
+Remaining time: 85 turns
+Items collected: 3/12
+
+Swiper location: deep_forest (nearby!)
+Swiper status: confused
+
+------------------------------------------------------------
+
+?- go(north).
+------------------------------------------------------------
+You moved from deep_forest to ancient_grove.
+
+=== Ancient Grove ===
+A sacred clearing with massive ancient trees.
+Mystical energy fills the air.
+Vines and flowers cover every surface.
+
+You can go: south, north
+
+Items here: none
+
+--- Swiper's Turn ---
+Swiper escapes to jungle_path with stolen goods...
+
+------------------------------------------------------------
+
+?- boots_search.
+------------------------------------------------------------
+Boots: "Ooh ooh ah ah! Let me look around!"
+Boots climbs up the trees and searches carefully...
+
+Boots found a hidden item!
+-> water_amulet was hidden here by Swiper!
+
+Boots: "Look Dora! I found something!"
+
+--- Swiper's Turn ---
+Swiper sneaks to beach_entrance...
+
+------------------------------------------------------------
+
+?- take(water_amulet).
+------------------------------------------------------------
+You picked up: water_amulet
+Added to your backpack!
+
+This is a special item! +20 bonus points!
+
+--- Swiper's Turn ---
+Swiper wanders somewhere...
+
+------------------------------------------------------------
+
+[... game continues ...]
+
+============================================================
+GAME END - VICTORY!
+============================================================
+
+?- use(ancestral_map).
+------------------------------------------------------------
+You use the ancestral_map at final_gate...
+
+The ancient symbols on the map glow brightly!
+A hidden door reveals itself!
+
+============================================================
+  CONGRATULATIONS!
+============================================================
+
+You found Heaven's Gift!
+
+Final Score: 250
+Items Collected: 12/12
+Time Remaining: 42 turns
+
+You've completed Dora's Tropical Adventure!
+Thanks for playing!
+
+Lo hicimos! We did it!
+
+============================================================
+SESSION END: 2024-12-03 15:15:30
+RESULT: WIN
+TOTAL COMMANDS: 47
+============================================================
+
+
+============================================================
+ALTERNATE ENDING - GAME OVER (Time Out)
+============================================================
+
+?- go(south).
+------------------------------------------------------------
+You moved from stone_circle to ruins_entrance.
+
+=== Ruins Entrance ===
+The entrance to ancient stone ruins.
+Weathered carvings cover the walls.
+
+TIME'S UP!
+
+============================================================
+  GAME OVER
+============================================================
+
+You ran out of time!
+Swiper has hidden too many items...
+
+Final Score: 120
+Items Collected: 7/12
+
+Better luck next time, explorer!
+
+============================================================
+SESSION END: 2024-12-03 15:45:00
+RESULT: LOSE
+TOTAL COMMANDS: 102
+============================================================

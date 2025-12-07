@@ -12,6 +12,7 @@ import uuid
 import threading
 import time
 import select
+from datetime import datetime
 
 # Import Swiper AI (prefers Fast-Downward PDDL planner)
 from swiper_planner import SwiperAI
@@ -19,9 +20,13 @@ from swiper_planner import SwiperAI
 # Get current directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Log directory
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
 app = Flask(__name__,
-            template_folder=os.path.join(BASE_DIR, 'templates'),
-            static_folder=os.path.join(BASE_DIR, 'static'))
+            template_folder=os.path.join(BASE_DIR, 'extra_code', 'templates'),
+            static_folder=os.path.join(BASE_DIR, 'extra_code', 'static'))
 app.secret_key = 'dora_adventure_prolog_2024'
 
 # Store Prolog processes for each session
@@ -143,9 +148,16 @@ class PrologSession:
             'game_time': 100,
             'hidden_items': []
         }
+        # Interaction log
+        self.interaction_log = []
+        self.game_started_at = None
+        self.game_ended = False
 
     def start(self):
         """Start Prolog process"""
+        self.game_started_at = datetime.now()
+        self.interaction_log = []
+        self.game_ended = False
         prolog_file = os.path.join(BASE_DIR, 'dora_adventure.pl')
 
         # Start SWI-Prolog process (using pipes, non-interactive mode)
@@ -264,6 +276,10 @@ class PrologSession:
                 # Parse state info from output to update cache (only in non-silent mode)
                 if not silent:
                     self._parse_state_from_output(output)
+                    # Log interaction
+                    self._log_interaction(command, output)
+                    # Check game end
+                    self._check_game_end(output)
 
                 return output if output else "(Command executed)"
 
@@ -315,6 +331,87 @@ class PrologSession:
                 cleaned.append(line)
 
         return '\n'.join(cleaned)
+
+    def _log_interaction(self, command, output):
+        """Log player interaction"""
+        timestamp = datetime.now().strftime('%H:%M:%S')
+        self.interaction_log.append({
+            'timestamp': timestamp,
+            'command': command,
+            'output': output
+        })
+
+    def _check_game_end(self, output):
+        """Check if game has ended (win or lose)"""
+        if self.game_ended:
+            return
+
+        # Check for win conditions (match Prolog output)
+        win_patterns = [
+            'Congratulations',              # Normal win: "Congratulations! You made it home!"
+            'Victory through Heaven',       # Hidden ending: "Victory through Heaven's Gift!"
+            'You triggered the hidden ending'  # Hidden ending message
+        ]
+
+        # Check for lose conditions (match Prolog output)
+        lose_patterns = [
+            'GAME OVER',                    # Timeout: "GAME OVER - Time's Up!"
+            'Time\'s Up',                   # Timeout message
+            'Swiper wins'                   # Lose message: "Swiper wins this round!"
+        ]
+
+        output_lower = output.lower()
+
+        game_result = None
+        if any(p.lower() in output_lower for p in win_patterns):
+            game_result = 'WIN'
+        elif any(p.lower() in output_lower for p in lose_patterns):
+            game_result = 'LOSE'
+
+        if game_result:
+            self.game_ended = True
+            self._save_log(game_result)
+
+    def _save_log(self, result):
+        """Save interaction log to file"""
+        if not self.interaction_log:
+            return
+
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        short_id = self.session_id[:8]
+        filename = f"game_{timestamp}_{short_id}_{result}.log"
+        filepath = os.path.join(LOG_DIR, filename)
+
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                # Write header
+                f.write("=" * 60 + "\n")
+                f.write("Dora's Tropical Adventure - Game Log\n")
+                f.write("=" * 60 + "\n")
+                f.write(f"Session ID: {self.session_id}\n")
+                f.write(f"Started at: {self.game_started_at.strftime('%Y-%m-%d %H:%M:%S') if self.game_started_at else 'N/A'}\n")
+                f.write(f"Ended at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Result: {result}\n")
+                f.write(f"Total commands: {len(self.interaction_log)}\n")
+                f.write("=" * 60 + "\n\n")
+
+                # Write interactions
+                for i, entry in enumerate(self.interaction_log, 1):
+                    f.write(f"[{entry['timestamp']}] Command #{i}\n")
+                    f.write(f"?- {entry['command']}\n")
+                    f.write("-" * 40 + "\n")
+                    f.write(entry['output'] + "\n")
+                    f.write("\n")
+
+                # Write footer
+                f.write("=" * 60 + "\n")
+                f.write("END OF LOG\n")
+                f.write("=" * 60 + "\n")
+
+            print(f"[LOG] Game log saved: {filepath}")
+        except Exception as e:
+            print(f"[LOG] Failed to save log: {e}")
 
     def get_game_state_for_ai(self):
         """
@@ -745,8 +842,8 @@ if __name__ == '__main__':
     print("  This is a real Prolog game!")
     print("  Running dora_adventure.pl (SWI-Prolog)")
     print()
-    print("  Visit: http://localhost:5002")
-    print("  Admin: http://localhost:5002/admin")
+    print("  Visit: http://localhost:5001")
+    print("  Admin: http://localhost:5001/admin")
     print()
     print("  Make sure SWI-Prolog is installed:")
     print("     brew install swi-prolog")
@@ -754,4 +851,4 @@ if __name__ == '__main__':
     print("=" * 60)
     print()
 
-    app.run(debug=True, host='0.0.0.0', port=5002, threaded=True)
+    app.run(debug=True, host='0.0.0.0', port=5001, threaded=True)

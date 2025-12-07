@@ -339,6 +339,12 @@ move_to_room(NextRoom) :-
     retract(game_time(Time)),
     assert(game_time(NewTime)),
 
+    % Check if time ran out
+    (   NewTime =< 0
+    ->  lose_game_timeout
+    ;   true
+    ),
+
     % v5 modified: Process monkey search cooldown
     process_monkey_cooldown,
 
@@ -753,6 +759,7 @@ swiper_hide_item(Item, Location) :-
     assert(swiper_hidden_item(Location, Item)).
 
 % v5 Enhanced: Swiper Steals and Hides
+% v6 Update: Swiper can now steal crystal_key, causing instant game over!
 enhanced_steal_action :-
     player_backpack(Backpack),
     Backpack \= [],
@@ -763,23 +770,29 @@ enhanced_steal_action :-
     ;   swiper_confused(_)
     ->  writeln('Swiper is confused and fails to steal!'),
         writeln('Swiper: "I... where am I?"')
-    ;   % Randomly steal an item
+    ;   % Randomly steal an item (now including crystal_key!)
         random_member(StolenItem, Backpack),
-        \+ critical_item(StolenItem),  % Don't steal critical items
         retract(player_backpack(Backpack)),
         delete(Backpack, StolenItem, NewBackpack),
         assert(player_backpack(NewBackpack)),
         format('Swiper appears suddenly and snatches your ~w!~n', [StolenItem]),
 
-        % 50% chance to hide item
-        random(HideChance),
-        player_location(Location),
-        (   HideChance < 0.5,
-            (climbable_location(Location) ; swimmable_location(Location))
-        ->  swiper_hide_item(StolenItem, Location),
-            writeln('Swiper: "You\'ll never find it! Hahahaha!"')
-        ;   writeln('Swiper steals the item and quickly escapes!'),
-            writeln('Swiper: "You\'re too slow!"')
+        % Check if crystal_key was stolen - GAME OVER!
+        (   StolenItem = crystal_key
+        ->  writeln(''),
+            writeln('Swiper: "The Crystal Key! This is exactly what I wanted!"'),
+            writeln('Swiper runs away with the key, laughing maniacally!'),
+            lose_game_key_stolen
+        ;   % 50% chance to hide non-critical item
+            random(HideChance),
+            player_location(Location),
+            (   HideChance < 0.5,
+                (climbable_location(Location) ; swimmable_location(Location))
+            ->  swiper_hide_item(StolenItem, Location),
+                writeln('Swiper: "You\'ll never find it! Hahahaha!"')
+            ;   writeln('Swiper steals the item and quickly escapes!'),
+                writeln('Swiper: "You\'re too slow!"')
+            )
         )
     ).
 
@@ -838,6 +851,44 @@ win_game :-
     format('Final Score: ~w~n', [Score]),
     game_time(Time),
     format('Remaining Time: ~w~n', [Time]),
+    writeln('Thank you for playing Dora\'s Tropical Adventure!'),
+    nl.
+
+lose_game_timeout :-
+    nl,
+    writeln('==============================================='),
+    writeln('    GAME OVER - Time\'s Up!'),
+    writeln('==============================================='),
+    writeln('You ran out of time and couldn\'t find your way home...'),
+    writeln('Swiper wins this round!'),
+    nl,
+    player_score(Score),
+    format('Final Score: ~w~n', [Score]),
+    player_backpack(Backpack),
+    length(Backpack, ItemCount),
+    format('Items Collected: ~w~n', [ItemCount]),
+    nl,
+    writeln('Better luck next time, explorer!'),
+    writeln('Thank you for playing Dora\'s Tropical Adventure!'),
+    nl.
+
+lose_game_key_stolen :-
+    nl,
+    writeln('==============================================='),
+    writeln('    GAME OVER - Crystal Key Stolen!'),
+    writeln('==============================================='),
+    writeln('Oh no! Swiper stole the Crystal Key!'),
+    writeln('Without it, you can never open the Final Gate...'),
+    writeln('Swiper: "Hahahaha! You\'ll never get home now!"'),
+    nl,
+    player_score(Score),
+    format('Final Score: ~w~n', [Score]),
+    player_backpack(Backpack),
+    length(Backpack, ItemCount),
+    format('Items Collected: ~w~n', [ItemCount]),
+    nl,
+    writeln('The Crystal Key is lost forever...'),
+    writeln('Better luck next time, explorer!'),
     writeln('Thank you for playing Dora\'s Tropical Adventure!'),
     nl.
 
