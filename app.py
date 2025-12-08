@@ -589,6 +589,16 @@ def start_game():
     try:
         prolog_session.start()
         output = prolog_session.send_command('start')
+
+        # 作弊模式：查询天赐宝物位置并打印到后台日志
+        gift_output = prolog_session.send_command('gift_location(X), write(X), nl', silent=True)
+        gift_match = re.search(r'(\w+)', gift_output)
+        if gift_match and gift_match.group(1) not in ['true', 'false', 'X', 'write', 'nl']:
+            gift_loc = gift_match.group(1)
+            print(f"\n{'='*50}")
+            print(f"🎁 [作弊提示] 天赐宝物位置: {gift_loc}")
+            print(f"{'='*50}\n")
+
         return jsonify({
             'success': True,
             'output': output

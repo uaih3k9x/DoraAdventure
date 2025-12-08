@@ -35,6 +35,13 @@
 :- dynamic swiper_hidden_item/2.           % Items hidden by Swiper (location, item)
 :- dynamic gift_location/1.                % Heaven's gift location
 :- dynamic monkey_search_cooldown/1.       % Monkey search cooldown time
+:- dynamic heavens_gift_chance/1.          % Heaven's gift probability (0.0 - 1.0)
+
+% ============================================================
+% Heaven's Gift Configuration
+% ============================================================
+% Set to 1.0 for 100% chance, 0.1 for 10% chance
+heavens_gift_chance(1.0).  % 当前设置：100% 必中大奖
 
 % ============================================================
 % Monkey Boots Basic Attributes (v5 New)
@@ -673,11 +680,12 @@ monkey_search_implementation :-
         ;   format('~w: "Nothing hidden by Swiper here."~n', [Boots])
         ),
 
-        % Check for heaven's gift (10% chance)
+        % Check for heaven's gift (使用标识位控制概率)
         gift_location(GiftLoc),
+        heavens_gift_chance(GiftProbability),
         (   Location = GiftLoc
         ->  random(GiftChance),
-            (   GiftChance < 0.1  % 10% chance to find
+            (   GiftChance < GiftProbability
             ->  find_heavens_gift
             ;   true
             )
