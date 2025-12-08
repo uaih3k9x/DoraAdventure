@@ -41,7 +41,7 @@
 % Heaven's Gift Configuration
 % ============================================================
 % Set to 1.0 for 100% chance, 0.1 for 10% chance
-heavens_gift_chance(1.0).  % 当前设置：100% 必中大奖
+heavens_gift_chance(0.1).  % 当前设置：10% 概率
 
 % ============================================================
 % Monkey Boots Basic Attributes (v5 New)

@@ -341,6 +341,13 @@ class PrologSession:
             'output': output
         })
 
+        # 检测天赐宝物触发
+        if "Heaven's Gift" in output or "Miracle Happened" in output:
+            print(f"\n{'='*50}")
+            print(f"🎉 [天赐宝物触发!] Session: {self.session_id[:8]}")
+            print(f"   Command: {command}")
+            print(f"{'='*50}\n")
+
     def _check_game_end(self, output):
         """Check if game has ended (win or lose)"""
         if self.game_ended:
